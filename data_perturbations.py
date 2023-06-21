@@ -23,6 +23,7 @@ def add_laplace_measurement_noise(y,sigma = 0.1):
 
 def add_X_noise(X,sigma = 0.1):
     X_perturbed = X + np.random.normal(0,sigma,size=(X.shape[0],X.shape[1]))
+    return X_perturbed
 
 def remove_X_observations(X):
     return 

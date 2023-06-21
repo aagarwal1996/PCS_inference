@@ -9,7 +9,7 @@ from sklearn.linear_model import LinearRegression, RidgeCV, LassoCV
 from sklearn.metrics import r2_score
 #model = [LinearRegression, RidgeCV]
 #model_names = ["OLS", "RidgeCV"]
-models = {"OLS": LinearRegression, "RidgeCV": RidgeCV, "LassoCV": LassoCV}
+models = {"OLS": LinearRegression, "RidgeCV": RidgeCV}# "LassoCV": LassoCV}
 
 def predictability_screening(X_train,y_train,X_val,y_val):
     prediction_performance = {}
