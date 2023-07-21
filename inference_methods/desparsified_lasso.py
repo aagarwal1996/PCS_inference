@@ -225,16 +225,21 @@ def desparsified_lasso(X, y, dof_ajdustement=False,
 if __name__ == '__main__':
     n_samples, n_features = 100, 10
     support_size = 1
-    sigma = 0.1
+    sigma = 0.01
     rho = 0.0
 
     X = np.random.normal(size=(n_samples,n_features))
-    y,support,beta = linear_model(X=X,sigma=sigma,s=support_size,beta=1.0,return_support=True)
+    y,support,beta_s = linear_model(X=X,sigma=sigma,s=support_size,beta=1.0,return_support=True)
     beta_hat, cb_min, cb_max = desparsified_lasso(X, y)
+    beta = np.zeros(n_features)
+    for j in range(support_size):
+        beta[j] = beta_s[j]
     print("beta_hat")
     print(beta_hat)
-    print("confidence interval")
-    print(cb_min,cb_max)
+    print("lower confidence interval")
+    print(cb_min)
+    print("upper confidence interval")
+    print(cb_max)
 
     assert_almost_equal(beta_hat, beta, decimal=1)
     assert_equal(cb_min < beta, True)
