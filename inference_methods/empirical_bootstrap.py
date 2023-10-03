@@ -16,9 +16,9 @@ sys.path.append("../sim_utils/")
 from dgp import linear_model
 
 
-def residual_bootstrap(X,y,model = 'linear', B = 50):
+def empirical_bootstrap(X,y,model = 'linear', B = 50):
     """
-    Compute confidence intervals via residual bootstrap.
+    Compute confidence intervals via empirical bootstrap.
     
     Parameters
     ----------
@@ -44,14 +44,12 @@ def residual_bootstrap(X,y,model = 'linear', B = 50):
     else: 
         raise ValueError('The only regression method available is lasso and OLS')
 
-    reg.fit(X,y) #fit model 
-    preds = reg.predict(X)
-    residuals = y - preds #compute residuals
     model_coefs = np.zeros((B,X.shape[1])) #compute bootstrap residuals and refit model.
+    reg.fit(X,y) #fit model 
     for i in range(B):
         bootstrapped_indices = resample([*range(n)])
         X_resampled = X[bootstrapped_indices,:]
-        y_resampled = preds[bootstrapped_indices] + residuals[bootstrapped_indices]
+        y_resampled = y[bootstrapped_indices]
         if model == 'linear':
             bootstrapped_model = LinearRegression()
         if model == 'lasso':
@@ -75,5 +73,5 @@ if __name__ == '__main__':
 
     X = np.random.normal(size=(n_samples,n_features))
     y,support,beta_s = linear_model(X=X,sigma=sigma,s=support_size,beta=1.0,return_support=True)
-    print(residual_bootstrap(X,y))
+    print(empirical_bootstrap(X,y))
     
