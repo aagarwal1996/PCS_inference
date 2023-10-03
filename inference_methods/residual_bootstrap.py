@@ -49,8 +49,9 @@ def residual_bootstrap(X,y,model = 'linear', B = 50):
     reg.fit(X,y) #fit model 
     preds = reg.predict(X)
     residuals = y - preds #compute residuals
-    model_coefs = np.zeros((B,X.shape[1])) #compute bootstrap residuals and refit model.
-    for i in range(B):
+    residuals = residuals - np.mean(residuals) #center residuals
+    model_coefs = np.zeros((B,X.shape[1])) #store coefficients across bootstrap samples
+    for i in range(B): #compute bootstrap residuals and refit model.
         bootstrapped_indices = resample([*range(n)])
         X_resampled = X[bootstrapped_indices,:]
         y_resampled = preds[bootstrapped_indices] + residuals[bootstrapped_indices]
