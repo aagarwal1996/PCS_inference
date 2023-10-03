@@ -19,8 +19,9 @@ from classic_confidence_interval import *
 from desparsified_lasso_inference import *
 from empirical_bootstrap import *
 from residual_bootstrap import *
+from lasso_mls import *
 
-inference_methods = ["Classic_CI","Empirical_Bootstrap", "Residual_Bootstrap","Desparsified_Lasso"]
+inference_methods = ["Classic_CI","Empirical_Bootstrap", "Residual_Bootstrap","Desparsified_Lasso","lasso_mls"]
 
 def run_sim(X,sigma,s,beta,n_repeats):
     """
@@ -46,6 +47,8 @@ def run_sim(X,sigma,s,beta,n_repeats):
                 cb_min,cb_max = residual_bootstrap(X,y)
             elif method == "Desparsified_Lasso":
                 beta_hat,cb_min,cb_max = desparsified_lasso(X,y)
+            elif method == "lasso_mls":
+                cb_min,cb_max = residual_mls(X,y)
             lengths[method][i,:] = np.array(get_length(cb_min,cb_max))
             coverage[method][i,:] = np.array(check_if_covers(beta_s,cb_min,cb_max))
     for key in coverage:

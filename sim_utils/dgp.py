@@ -78,6 +78,9 @@ def linear_model(X, sigma, s, beta, heritability=None, snr=None, error_fun=None,
 
     if return_support:
         support = np.concatenate((np.ones(s), np.zeros(X.shape[1] - s)))
-        return y_train, support, beta
+        beta_full = np.zeros(X.shape[1])
+        for i in range(s):
+            beta_full[i] = beta[i]
+        return y_train, support, beta_full
     else:
         return y_train
