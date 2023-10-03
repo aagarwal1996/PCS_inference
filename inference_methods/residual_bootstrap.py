@@ -14,6 +14,8 @@ from sklearn.utils import resample
 import sys
 sys.path.append("../sim_utils/")
 from dgp import linear_model
+from evaluation_metrics import *
+
 
 
 def residual_bootstrap(X,y,model = 'linear', B = 50):
@@ -75,5 +77,8 @@ if __name__ == '__main__':
 
     X = np.random.normal(size=(n_samples,n_features))
     y,support,beta_s = linear_model(X=X,sigma=sigma,s=support_size,beta=1.0,return_support=True)
-    print(residual_bootstrap(X,y))
+    cb_min,cb_max = residual_bootstrap(X,y)
+    print(cb_min,cb_max)
+    print(get_length(cb_min,cb_max))
+    print(check_if_covers(beta_s,cb_min,cb_max))
     
