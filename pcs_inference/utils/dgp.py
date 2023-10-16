@@ -1,9 +1,6 @@
 import numpy as np
-import pandas as pd
 import random
-from scipy.linalg import toeplitz
-import warnings
-import math
+
 
 
 def generate_coef(beta, s):
@@ -34,6 +31,7 @@ def linear_model(X, sigma, s, beta, heritability=None, snr=None, error_fun=None,
 
     beta = generate_coef(beta, s)
     y_train = np.array([create_y(X[i, :], s, beta) for i in range(len(X))])
+    return y_train, beta
     if heritability is not None:
         sigma = (np.var(y_train) * ((1.0 - heritability) / heritability)) ** 0.5
     if snr is not None:

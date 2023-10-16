@@ -1,6 +1,5 @@
 import numpy as np
 from numpy.linalg import norm
-from scipy.linalg import toeplitz, solve
 from sklearn.linear_model import LassoCV, MultiTaskLassoCV
 from sklearn.model_selection import KFold
 
