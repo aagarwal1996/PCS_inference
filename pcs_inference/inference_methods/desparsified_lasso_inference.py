@@ -6,13 +6,10 @@ from joblib import Parallel, delayed
 from sklearn.utils.validation import check_memory
 from sklearn.linear_model import Lasso
 
-from noise_estimation import reid
+from ..inference_methods.noise_estimation import reid
 from numpy.testing import assert_almost_equal, assert_equal
 
-import sys
-sys.path.append("../sim_utils/")
-from dgp import linear_model
-
+from ..utils.dgp import linear_model
 
 def _compute_all_residuals(X, alphas, gram, max_iter=5000, tol=1e-3,
                            method='lasso', n_jobs=1, verbose=0):
@@ -219,7 +216,7 @@ if __name__ == '__main__':
     rho = 0.0
 
     X = np.random.normal(size=(n_samples,n_features))
-    y,support,beta_s = linear_model(X=X,sigma=sigma,s=support_size,beta=1.0,return_support=True)
+    y,beta_s = linear_model(X=X,sigma=sigma,s=support_size,beta=1.0,return_support=True)
     beta_hat, cb_min, cb_max = desparsified_lasso(X, y)
     beta = np.zeros(n_features)
     for j in range(support_size):

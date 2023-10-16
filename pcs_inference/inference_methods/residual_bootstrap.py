@@ -1,25 +1,15 @@
 import numpy as np
-from numpy.linalg import multi_dot
-from scipy import stats
-from scipy.linalg import inv
-from joblib import Parallel, delayed
-from sklearn.utils.validation import check_memory
-from sklearn.linear_model import LassoCV,LinearRegression
-import statsmodels.api as sm
-from noise_estimation import reid
-from numpy.testing import assert_almost_equal, assert_equal
-from sklearn.model_selection import train_test_split
+
 from sklearn.utils import resample
+from sklearn.linear_model import LassoCV,LinearRegression
 
-import sys
-sys.path.append("../sim_utils/")
-from dgp import linear_model
-from evaluation_metrics import *
+from ..utils.evaluation_metrics import get_length, check_if_covers
+from ..utils.dgp import linear_model
 
 
-def empirical_bootstrap(X,y,model = 'linear', B = 50):
+def residual_bootstrap(X,y,model = 'linear', B = 50):
     """
-    Compute confidence intervals via empirical bootstrap.
+    Compute confidence intervals via residual bootstrap.
     
     Parameters
     ----------
@@ -45,12 +35,15 @@ def empirical_bootstrap(X,y,model = 'linear', B = 50):
     else: 
         raise ValueError('The only regression method available is lasso and OLS')
 
-    model_coefs = np.zeros((B,X.shape[1])) #compute bootstrap residuals and refit model.
     reg.fit(X,y) #fit model 
-    for i in range(B):
+    preds = reg.predict(X)
+    residuals = y - preds #compute residuals
+    residuals = residuals - np.mean(residuals) #center residuals
+    model_coefs = np.zeros((B,X.shape[1])) #store coefficients across bootstrap samples
+    for i in range(B): #compute bootstrap residuals and refit model.
         bootstrapped_indices = resample([*range(n)])
         X_resampled = X[bootstrapped_indices,:]
-        y_resampled = y[bootstrapped_indices]
+        y_resampled = preds[bootstrapped_indices] + residuals[bootstrapped_indices]
         if model == 'linear':
             bootstrapped_model = LinearRegression()
         if model == 'lasso':
@@ -74,7 +67,8 @@ if __name__ == '__main__':
 
     X = np.random.normal(size=(n_samples,n_features))
     y,support,beta_s = linear_model(X=X,sigma=sigma,s=support_size,beta=1.0,return_support=True)
-    cb_min,cb_max = empirical_bootstrap(X,y)
+    cb_min,cb_max = residual_bootstrap(X,y)
     print(cb_min,cb_max)
     print(get_length(cb_min,cb_max))
     print(check_if_covers(beta_s,cb_min,cb_max))
+    
