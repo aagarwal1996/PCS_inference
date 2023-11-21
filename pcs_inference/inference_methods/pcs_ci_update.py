@@ -13,55 +13,6 @@ import sys
 
 
 
-def residual_bootstrap(X,y,model = 'linear', B = 50):
-    """
-    Compute confidence intervals via residual bootstrap.
-    
-    Parameters
-    ----------
-    X : ndarray, shape (n_samples, n_features)
-        Data.
-
-    y : ndarray, shape (n_samples,)
-        Target.
-
-    model : linear regression model 
-
-    B : int
-        Number of bootstrap samples.
-
-    """
-    n = X.shape[0]
-    cb_min = [0]*X.shape[1]
-    cb_max = [0]*X.shape[1]
-    if model == 'linear':
-        reg = LinearRegression()
-    elif model == 'lasso':
-        reg = LassoCV()
-    else: 
-        raise ValueError('The only regression method available is lasso and OLS')
-
-    reg.fit(X,y) #fit model 
-    preds = reg.predict(X)
-    residuals = y - preds #compute residuals
-    residuals = residuals - np.mean(residuals) #center residuals
-    model_coefs = np.zeros((B,X.shape[1])) #store coefficients across bootstrap samples
-    for i in range(B): #compute bootstrap residuals and refit model.
-        bootstrapped_indices = resample([*range(n)])
-        X_resampled = X[bootstrapped_indices,:]
-        y_resampled = preds[bootstrapped_indices] + residuals[bootstrapped_indices]
-        if model == 'linear':
-            bootstrapped_model = LinearRegression()
-        if model == 'lasso':
-             bootstrapped_model = LassoCV()
-        bootstrapped_model.fit(X_resampled,y_resampled)
-        model_coefs[i,:] = bootstrapped_model.coef_
-    stds = np.std(model_coefs,axis = 0)
-    cb_min =  reg.coef_ - 1.96*stds
-    cb_max = reg.coef_ + 1.96*stds
-    return cb_min,cb_max
-        
-
 def generate_bootstrap_oob_indices(n):
     '''
     Generates bootstrap samples 
@@ -227,12 +178,7 @@ if __name__ == "__main__":
 
     print("")
     print("")
-    
-    lower_res,upper_res = residual_bootstrap(X,y)
-    concatenated_bounds_res = [(lower_res[i],upper_res[i]) for i in range(len(upper_res))]
-    print(f"residual confidence bounds:  {concatenated_bounds_res}")
-
-    
+   
     print(f"True coefficients: {coef} ")
 
                          
