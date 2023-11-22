@@ -9,7 +9,7 @@ from sklearn.datasets import make_regression
 from sklearn.metrics import mean_squared_error
 
 import sys
-
+sys
 
 
 
@@ -128,7 +128,8 @@ class PCSInference(object):
         for i,method in enumerate(self.filtered_methods):
             bootstrap_indices = np.random.choice(X_test.shape[0], size=size, replace=True)
             X_bs = X_test[bootstrap_indices, :]
-            residual_bs = residuals[i,bootstrap_indices]
+            residual_bs = residuals[i,bootstrap_indices] 
+            residual_bs = residual_bs - np.mean(residual_bs)
             method_coef = coefs[i,:]
             y_bs =  np.matmul(X_bs,coef) + residual_bs
             X_synthetic.append(X_bs)
