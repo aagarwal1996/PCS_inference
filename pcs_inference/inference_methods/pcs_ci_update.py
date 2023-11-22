@@ -92,7 +92,7 @@ class PCSInference(object):
                 test_coefs[b,:,i] = m.coef_
         return test_coefs
 
-    def get_adjusted_interval(self,test_coefs,lower,upper,alpha,expansion_percentage):
+    def get_adjusted_interval(self,test_coefs,lower,upper,alpha,expansion_percentage,linear_search_steps = 2000):
         '''
         adjust interval according to empirical coverage
         '''
@@ -101,13 +101,24 @@ class PCSInference(object):
         for i in range(len(concatenated_bounds)):
             confidence_intervals_i = concatenated_bounds[i]
             test_coefs_feature_i = test_coefs[:,i,:].flatten() # is of length num_filtered_methods * num_bootstraps
-            while get_coverage(test_coefs_feature_i,confidence_intervals_i) < 1.0 - alpha:
-                cur_length = confidence_intervals_i[1] - confidence_intervals_i[0]
-                expansion_amt = cur_length * expansion_percentage
-                confidence_intervals_i[0] = confidence_intervals_i[0] - expansion_amt/2
-                confidence_intervals_i[1] = confidence_intervals_i[1] + expansion_amt/2
-                
-            adjusted_bounds.append(confidence_intervals_i)
+            if get_coverage(test_coefs_feature_i,confidence_intervals_i) >= 1.0 - alpha:
+                adjusted_bounds.append(confidence_intervals_i)
+            else:        #adjust confidence interval via binary search on length
+                orig_lower_i,orig_upper_i= confidence_intervals_i[0],confidence_intervals_i[1]
+                orig_confidence_interval_i = [orig_lower_i,orig_upper_i]
+                orig_length_i = confidence_intervals_i[1] - confidence_intervals_i[0]
+                while get_coverage(test_coefs_feature_i,confidence_intervals_i) < 1.0 - alpha: #get upper bound on length 
+                    cur_length = confidence_intervals_i[1] - confidence_intervals_i[0]
+                    expansion_amt = cur_length * expansion_percentage
+                    confidence_intervals_i[0] = confidence_intervals_i[0] - expansion_amt/2
+                    confidence_intervals_i[1] = confidence_intervals_i[1] + expansion_amt/2
+                upper_bound_length_i = confidence_intervals_i[1] - confidence_intervals_i[0]
+                step_size = (upper_bound_length_i - orig_length_i)/linear_search_steps
+                while get_coverage(test_coefs_feature_i,orig_confidence_interval_i) < 1.0 - alpha:
+                    orig_confidence_interval_i[0] -= step_size
+                    orig_confidence_interval_i[1] += step_size
+            
+                adjusted_bounds.append(orig_confidence_interval_i)
         return adjusted_bounds
 
     def generate_data(self, X_test, coefs,residuals):
